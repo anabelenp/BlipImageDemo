@@ -1,24 +1,25 @@
-# Install the transformers library
-#!pip install transformers Pillow torch torchvision torchaudio (brew install)
-from transformers import BlipProcessor, BlipForConditionalGeneration
+import requests
 from PIL import Image
+from transformers import AutoProcessor, BlipForConditionalGeneration
 
-#Initilize the processor and model from Hugging Face
-processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large", use_fast=True)
-model =BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large")
+# Load the pretrained processor and model
+processor = AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 
-#load am image
-image = Image.open("ana-desk.jpeg")
+# Load your image, DON'T FORGET TO WRITE YOUR IMAGE NAME
+img_path = "Screenshot 2025-07-05 at 8.23.31 PM.png"
+# convert it into an RGB format 
+image = Image.open(img_path).convert('RGB')
 
-#Prepare the image
-#This line processes the input image using the BLIP processor,
-# converting it into a format suitable for the model.
-# The parameter return_tensors="pt" specifies that the output should be PyTorch tensors.
-# The result, inputs, contains the processed image data ready for model inference.
-inputs = processor(image, return_tensors="pt")
+# You do not need a question for image captioning
+text = "the image of"
+inputs = processor(images=image, text=text, return_tensors="pt")
 
-#Generate captions
-outputs = model.generate(**inputs)
-caption = processor.decode(outputs[0],skip_special_tokens=True)
+# Generate a caption for the image
+outputs = model.generate(**inputs, max_length=50)
 
-print("Generated caption:", caption)
+# Decode the generated tokens to text
+caption = processor.decode(outputs[0], skip_special_tokens=True)
+# Print the caption
+print(caption)
+
